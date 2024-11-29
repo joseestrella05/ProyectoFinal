@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Shared.Dtos;
 
-public class AplicationUserDto 
+public class AplicationUserDto : IdentityUser
 {
+    public string? Nombre { get; set; }
+    public string? Apellido { get; set; }
+    public int Cedula { get; set; }
 }
