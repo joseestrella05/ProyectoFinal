@@ -5,6 +5,10 @@ using Microsoft.Extensions.Azure;
 using ProyectoFinal.Components;
 using ProyectoFinal.Components.Account;
 using ProyectoFinal.Data;
+using ProyectoFinal.Services;
+using Radzen;
+using Shared.Interfaces;
+using Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +37,28 @@ var storageConnection = builder.Configuration["ConnectionStrings:imagenespizza:S
 builder.Services.AddAzureClients(azureBuilder => {
     azureBuilder.AddBlobServiceClient(storageConnection);
 });
+
+// Servicios
+builder.Services.AddScoped<IServerAsp<ApplicationUser>, UsersService>();
+builder.Services.AddScoped<IServerAsp<IdentityRole>, RolesService>();
+builder.Services.AddScoped<IServerAsp<IdentityUserRole<string>>, UserRolesService>();
+builder.Services.AddScoped<IServer<Productos>, ProductosService>();
+builder.Services.AddScoped<IServer<CategoriaProductos>, CategoriaProductosService>();
+builder.Services.AddScoped<IServer<Ordenes>, OrdenesService>();
+builder.Services.AddScoped<IServer<Ventas>, VentasService>();
+builder.Services.AddScoped<IServer<Estados>, EstadosService>();
+builder.Services.AddScoped<IServer<MetodoPagos>, MetodosPagosService>();
+builder.Services.AddScoped<ProductosService>();
+builder.Services.AddScoped<MetodoPagos>();
+builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<IdentityUserService>();
+builder.Services.AddScoped<UserManager<ApplicationUser>>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<RoleManager<IdentityRole>>();
+builder.Services.AddScoped<NotificacionService>();
+
+builder.Services.AddBlazorBootstrap();
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
