@@ -22,23 +22,26 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
     .AddIdentityCookies();
 
-// Configure DbContext with a connection string
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+// Si no necesitas DbContextFactory, elimina esta línea
+ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConStr")));
 
+// Configuración de Azure Blob Storage
+//Blob Services
 var storageConnection = builder.Configuration["ConnectionStrings:imagenespizza:Storage"];
 
 builder.Services.AddAzureClients(azureBuilder => {
     azureBuilder.AddBlobServiceClient(storageConnection);
 });
 
-// Servicios
+
+// Registrar servicios personalizados como scoped
 builder.Services.AddScoped<IServerAsp<ApplicationUser>, UsersService>();
 builder.Services.AddScoped<IServerAsp<IdentityRole>, RolesService>();
 builder.Services.AddScoped<IServerAsp<IdentityUserRole<string>>, UserRolesService>();
@@ -52,22 +55,32 @@ builder.Services.AddScoped<ProductosService>();
 builder.Services.AddScoped<MetodoPagos>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<IdentityUserService>();
-builder.Services.AddScoped<UserManager<ApplicationUser>>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<RoleManager<IdentityRole>>();
 builder.Services.AddScoped<NotificacionService>();
 
+// Blazor Bootstrap
 builder.Services.AddBlazorBootstrap();
 
-
+// Developer Exception Filter
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+// Configurar Identity con soporte para roles
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
+    .AddRoles<IdentityRole>() // Agregar soporte de roles
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    clientBuilder.AddBlobServiceClient(builder.Configuration["StorageConnection:blobServiceUri"]!).WithName("StorageConnection");
+    clientBuilder.AddQueueServiceClient(builder.Configuration["StorageConnection:queueServiceUri"]!).WithName("StorageConnection");
+    clientBuilder.AddTableServiceClient(builder.Configuration["StorageConnection:tableServiceUri"]!).WithName("StorageConnection");
+});
 
 var app = builder.Build();
 
@@ -79,7 +92,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
