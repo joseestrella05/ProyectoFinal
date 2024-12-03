@@ -6,7 +6,7 @@
     },
     "storage1": {
       "type": "storage",
-      "connectionId": "ConnectionStrings:ConStr",
+      "connectionId": "StorageConnection",
       "dynamicId": null
     }
   }

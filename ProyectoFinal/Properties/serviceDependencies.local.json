@@ -5,11 +5,11 @@
       "connectionId": "ConnectionStrings:DefaultConnection"
     },
     "storage1": {
-      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.ServiceLinker/locations/eastus2/connectors/ConnectionStringsConStr_CBBCB67CC3, /subscriptions/17a3067b-9ced-451c-ab82-f7e08d657f3e/resourceGroups/app/providers/Microsoft.ServiceLinker/locations/eastus2/connectors/ConnectionStringsConStr_4602A3D7A1",
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.ServiceLinker/locations/eastus/connectors/StorageConnection_5D5A457636, /subscriptions/17a3067b-9ced-451c-ab82-f7e08d657f3e/resourceGroups/PizzaYa/providers/Microsoft.ServiceLinker/locations/eastus/connectors/StorageConnection_4D18058559",
       "secretStore": "LocalSecretsFile",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/imagenespizza",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/pizzaapp",
       "type": "storage.azure",
-      "connectionId": "ConnectionStrings:ConStr",
+      "connectionId": "StorageConnection",
       "dynamicId": null
     }
   }

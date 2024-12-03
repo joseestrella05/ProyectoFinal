@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\ServiceDependecies\Piazza - Zip Deploy\" />
+    <Folder Include="Properties\ServiceDependecies\" />
   </ItemGroup>
 
 </Project>
