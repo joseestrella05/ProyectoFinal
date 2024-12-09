@@ -1,0 +1,185 @@
+﻿@page "/PizzaYa/Productos/Index"
+
+@using Shared.Interfaces
+@using Shared.Models
+@attribute [Authorize(Roles = "Admin")]
+
+@inject NavigationManager NavigationManager
+@inject IServer<Productos> productoService
+@inject IServer<CategoriaProductos> categoriaService
+@inject ApplicationDbContext dbContext
+
+@rendermode InteractiveServer
+
+@*Inventario*@
+<PageTitle>Inventario</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        @*Header*@
+        <div class="card-header text-center">
+            <h3><strong>Inventario</strong></h3>
+        </div>
+        @*Body*@
+        <div class="card-body">
+            @*Labels*@
+            <div class="row">
+                <div class="col-3">
+                    <label class="form-label" for="Filtro"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="form-label" for="ValorFiltro"><strong>B&uacute;squeda</strong></label>
+                </div>
+            </div>
+            <div class="row">
+                @*Filtro*@
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected>Elija una opción</option>
+                        <option value="ID"><strong>Id</strong></option>
+                        <option value="descripcion"><strong>Nombre</strong></option>
+                    </InputSelect>
+                </div>
+                @*Búsqueda*@
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
+                </div>
+                <div class="col text-end">
+                    <button type="button" class="btn btn-outline-primary ms-2" @onclick="MostrarPantallaCrear">Crear</button>
+                </div>
+            </div>
+            @*Tabla*@
+            <div class="text-center mt-3">
+                <table class="table table-striped table-borderless">
+                    <thead>
+                        <tr class="bg-warning">
+                            <th>Producto</th>
+                            <th>Nombre</th>
+                            <th>Categor&iacute;a</th>
+                            <th>Precio</th>
+                            <th>ITBIS</th>
+                            <th>Cantidad</th>
+                            <th>Estado</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in Listaproductos)
+                        {
+                            <tr>
+                                <td>@producto.ProductoId</td>
+                                <td>@producto.Nombre</td>
+                                <td>@producto.Categoria?.Nombre</td>
+                                <td>@producto.Precio.ToString("N2")</td>
+                                <td>@producto.ITBIS.ToString("N2")</td>
+                                <td>@producto.Cantidad</td>
+                                @if (producto.Disponible)
+                                {
+                                    <td><span class="badge bg-success">Disponible</span></td>
+                                }
+                                else
+                                {
+                                    <td><span class="badge bg-danger">No Disponible</span></td>
+                                }
+                                <td><button type="button" class="btn btn-primary" @onclick="() => Editar(producto.ProductoId)">Editar</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @*Footer*@
+        <div class="card-footer">
+            <p><strong>Productos Agregados: </strong>@Listaproductos.Count()</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Productos> Listaproductos { get; set; } = new List<Productos>();
+    public string? Filtro { get; set; }
+    public string? Mensaje { get; set; }
+    public string? ValorFiltro { get; set; }
+    public List<CategoriaProductos> Categorias { get; set; } = new List<CategoriaProductos>();
+    public int SelectedCategoriaId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Listaproductos = await productoService.GetAllObject();
+        Categorias = await categoriaService.GetAllObject();
+    }
+
+    public void MostrarPantallaCrear()
+    {
+        NavigationManager.NavigateTo("/PizzaYa/Productos/Create");
+    }
+
+    public async Task Buscar()
+    {
+        if (Filtro == null)
+        {
+            Mensaje = "Elija una opción";
+            StateHasChanged();
+            await Task.Delay(3000);
+            return;
+        }
+
+        switch (Filtro)
+        {
+            case "ID":
+                if (int.TryParse(ValorFiltro, out int id))
+                {
+                    var buscarId = Listaproductos.Where(c => c.ProductoId == id).FirstOrDefault();
+                    if (buscarId != null)
+                    {
+                        Listaproductos.Clear();
+                        Listaproductos.Add(buscarId);
+                        Mensaje = "Producto encontrado";
+                    }
+                    else
+                    {
+                        Mensaje = "No se encontraron resultados";
+                    }
+                }
+                else
+                {
+                    Mensaje = "El valor ingresado para ProductoId no es válido";
+                }
+                StateHasChanged();
+                break;
+
+            case "descripcion":
+                var buscarNombre = Listaproductos.Where(c => c.Nombre.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (buscarNombre.Any())
+                {
+                    Listaproductos = buscarNombre;
+                    Mensaje = "Producto encontrado";
+                }
+                else
+                {
+                    Mensaje = "No se encontraron resultados";
+                }
+                StateHasChanged();
+                break;
+        }
+    }
+
+    private async Task Restablecer()
+    {
+        Listaproductos = await productoService.GetAllObject();
+        Categorias = await categoriaService.GetAllObject();
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private void Editar(int ProductoId)
+    {
+        NavigationManager.NavigateTo($"/PizzaYa/Productos/Edit/{ProductoId}");
+    }
+}
