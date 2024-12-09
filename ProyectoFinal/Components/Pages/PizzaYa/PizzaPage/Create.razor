@@ -1,0 +1,156 @@
+﻿@page "/PizzaYa/Productos/Create"
+
+@using Shared.Interfaces
+@using Shared.Models
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IServer<Productos> productoService
+@inject IServer<CategoriaProductos> categoriaService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Crear Producto</PageTitle>
+<EditForm Model="Producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
+    <div class="container">
+        <div class="card shadow-lg">
+            @*Header*@
+            <div class="card-header fw-bold mb-0">
+                <h3><strong>Crear Producto</strong></h3>
+            </div>
+            @*Body*@
+            <div class="card-body">
+                <div class="row mt-2">
+                    <div class="col-6">
+                        @*Nombre*@
+                        <label class="form-label" for="nombre"><strong>Nombre</strong></label>
+                        <InputText class="form-control" id="nombre" @bind-Value="Producto.Nombre"></InputText>
+                        <ValidationMessage For="@(() => Producto.Nombre)" />
+                    </div>
+                    <div class="col-6">
+                        @*Descripción*@
+                        <label class="form-label" for="descripcion"><strong>Descripción</strong></label>
+                        <InputText class="form-control" id="descripcion" @bind-Value="Producto.Descripcion"></InputText>
+                        <ValidationMessage For="@(() => Producto.Descripcion)" />
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6">
+                        @*Cantidad*@
+                        <label class="form-label" for="cantidad"><strong>Cantidad</strong></label>
+                        <InputNumber class="form-control" id="cantidad" @bind-Value="Producto.Cantidad" @oninput="ActualizarDisponibilidad"></InputNumber>
+                        <ValidationMessage For="@(() => Producto.Cantidad)" />
+                    </div>
+                    <div class="col-6">
+                        @*Categoría*@
+                        <label class="form-label" for="categoria"><strong>Categoría</strong></label>
+                        <InputSelect class="form-control" id="categoria" @bind-Value="Producto.CategoriaId">
+                            <option value="">Seleccione una categoría</option>
+                            @foreach (var categoria in Categorias)
+                            {
+                                <option value="@categoria.CategoriaId">@categoria.Nombre</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => Producto.CategoriaId)" />
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6">
+                        @*Precio*@
+                        <label class="form-label" for="precio"><strong>Precio</strong></label>
+                        <InputNumber class="form-control" id="precio" @bind-Value="Producto.Precio" @oninput="ActualizarITBIS"></InputNumber>
+                        <ValidationMessage For="@(() => Producto.Precio)" />
+                    </div>
+                    <div class="col-6">
+                        @*ITBIS*@
+                        <label class="form-label" for="itbis"><strong>ITBIS</strong></label>
+                        <InputNumber class="form-control" id="itbis" @bind-Value="Producto.ITBIS" ReadOnly></InputNumber>
+                    </div>
+                </div>
+            </div>
+            @*Footer*@
+            <div class="card-footer text-center">
+                <button type="button" class="btn btn-outline-secondary ms-2" @onclick="Volver"> Volver</button>
+                <button type="submit" class="btn btn-outline-primary ms-2">Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Productos Producto { get; set; } = new Productos();
+    public List<ToastMessage> Mensaje = new List<ToastMessage>();
+    public List<CategoriaProductos> Categorias { get; set; } = new List<CategoriaProductos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categorias = (await categoriaService.GetAllObject()).ToList();
+    }
+
+    public async Task Guardar()
+    {
+        if (!await Validar())
+        {
+            var result = await productoService.AddObject(Producto);
+
+            if (result != null)
+            {
+                Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
+                Producto = new Productos();
+            }
+            else
+            {
+                Notificacion(ToastType.Danger, $"Error al Guardar el Producto");
+            }
+        }
+        else
+        {
+            Notificacion(ToastType.Warning, $"Ya Existe un Producto con este Nombre");
+        }
+    }
+
+    public async Task<bool> Validar()
+    {
+        var existe = await productoService.Exist(Producto.ProductoId, Producto.Nombre);
+        return existe;
+    }
+
+    public void Volver()
+    {
+        Navigation.NavigateTo("/PizzaYa/Productos/Index");
+    }
+
+    private void ActualizarDisponibilidad(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int cantidad))
+        {
+            Producto.Disponible = cantidad > 0;
+        }
+        else
+        {
+            Producto.Disponible = false;
+        }
+    }
+
+    private void ActualizarITBIS(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal precio))
+        {
+            Producto.ITBIS = (float)(precio * 0.18m);
+        }
+    }
+
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+}
