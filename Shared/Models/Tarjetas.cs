@@ -20,7 +20,7 @@ public class Tarjetas
     [Required(ErrorMessage = "Se requiere un Nombre")]
     public string? NombreTitular { get; set; }
 
-    public DateTime FechaVencimiento { get; set; }
+    public DateTime FechaVencimiento { get; set; } = DateTime.Now;
 
     [RegularExpression(@"^\d{3}$", ErrorMessage = "El Código de Seguridad debe tener 3 dígitos")]
     [Required(ErrorMessage = "Se requiere un Código de Seguridad")]
