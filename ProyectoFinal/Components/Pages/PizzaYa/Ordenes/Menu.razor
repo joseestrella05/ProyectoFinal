@@ -1,0 +1,276 @@
+﻿@page "/PizzaYa/Menu"
+
+@using Shared.Interfaces
+@using Shared.Models
+@using System.Text.Json
+
+@inject IServer<Productos> productosService
+@inject IServer<Ordenes> ordenesService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
+
+<!-- Sidebar del Carrito -->
+<div class="sidebar">
+    <div class="card">
+        <div class="card-header text-center bg-primary text-white">
+            <strong>Tu Carrito (@Orden.OrdenesDetalle.Count())</strong>
+        </div>
+        <div class="card-body">
+            @if (Orden.OrdenesDetalle.Count() == 0)
+            {
+                <p class="text-center text-muted">No hay productos en tu carrito.</p>
+            }
+            else
+            {
+                @foreach (var detalle in Orden.OrdenesDetalle)
+                {
+                    <div class="d-flex align-items-center my-2">
+                        @if (detalle.Producto != null)
+                        {
+                            <img src="@detalle.Producto.ImagenUrl" alt="Producto" class="img-thumbnail me-2" style="width: 60px; height: 60px;">
+                        }
+                        <div class="flex-grow-1">
+                            <p class="mb-1">@detalle.Producto.Nombre</p>
+                            <p class="text-muted small mb-0">Cantidad: @detalle.Cantidad</p>
+                        </div>
+                        <button class="btn btn-sm btn-danger" @onclick="()=>EliminarProducto(detalle)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+        <div class="card-footer text-center">
+            <div class="d-flex justify-content-between">
+                <span><strong>Total:</strong></span>
+                <span><strong>@Orden.OrdenesDetalle.Sum(x => x.Precio * x.Cantidad).ToString("C")</strong></span>
+            </div>
+            <button class="btn btn-success mt-3 w-100" @onclick="ContinuarPedido">
+                Continuar Pedido
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Título -->
+<div class="text-center mt-4">
+    <h1><strong>Menú</strong></h1>
+</div>
+
+<!-- Menú de Productos -->
+<div class="container mt-4">
+    <div class="row">
+        @if (ListaProductos == null)
+        {
+            <p>Cargando productos...</p>
+        }
+        else if (!ListaProductos.Any())
+        {
+            <p>No hay productos disponibles.</p>
+        }
+        else
+        {
+            var categorias = new Dictionary<int, string>
+            {
+                { 1, "Pizza" },
+                { 2, "Bebida" }
+            };
+
+            var productosPorCategoria = ListaProductos.GroupBy(p => p.CategoriaId);
+
+            foreach (var grupo in productosPorCategoria)
+            {
+                <h2 class="mt-3">@categorias[grupo.Key]</h2>
+                <div class="row">
+                    @foreach (var producto in grupo)
+                    {
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <img src="@producto.ImagenUrl" class="card-img-top" alt="@producto.Nombre">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">@producto.Nombre</h5>
+                                    <p class="card-text text-muted">@producto.Descripcion</p>
+                                    <p class="card-text"><strong>@producto.Precio.ToString("C")</strong></p>
+                                    <button class="btn btn-primary" @onclick="() => MostrarModalProducto(producto)">Añadir</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Modal del Producto -->
+<div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModal1Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@productoSeleccionado.Nombre</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="@productoSeleccionado.ImagenUrl" class="img-fluid mb-3" alt="Producto">
+                <p>@productoSeleccionado.Descripcion</p>
+                <p><strong>Precio: @productoSeleccionado.Precio.ToString("C")</strong></p>
+                <div class="d-flex justify-content-center align-items-center">
+                    <button class="btn btn-sm btn-secondary me-2" @onclick="DecrementCount">-</button>
+                    <span>@currentCount</span>
+                    <button class="btn btn-sm btn-secondary ms-2" @onclick="IncrementCount">+</button>
+                </div>
+                <button class="btn btn-success mt-3" @onclick="() => AgregarProducto(productoSeleccionado)" data-bs-dismiss="modal">Agregar al Carrito</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (modalProducto)
+{
+    <script>
+        var modal = new bootstrap.Modal(document.getElementById('exampleModal1'));
+        modal.show();
+    </script>
+}
+
+
+
+@code {
+    private List<Productos> ListaProductos = new List<Productos>();
+    public List<ToastMessage> Mensaje = new List<ToastMessage>();
+    private Ordenes Orden { get; set; } = new Ordenes();
+    public Productos productoSeleccionado { get; set; } = new Productos();
+    public CategoriaProductos Categoria { get; set; } = new CategoriaProductos();
+    public bool modalProducto { get; set; }
+    public float Precio { get; set; }
+    private int currentCount = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaProductos = await productosService.GetAllObject();
+    }
+
+
+    private void IncrementCount()
+    {
+        currentCount++;
+
+        if (productoSeleccionado.Cantidad <= 1)
+        {
+            Notificacion(ToastType.Warning, "No hay suficiente stock de este producto.");
+            currentCount = 1;
+            Precio = productoSeleccionado.Precio;
+
+        }
+        else if (currentCount >= productoSeleccionado.Cantidad)
+        {
+            Notificacion(ToastType.Warning, "No hay suficiente stock de este producto.");
+            currentCount = productoSeleccionado.Cantidad;
+            Precio = productoSeleccionado.Precio * currentCount;
+        }
+        else
+        {
+            Precio = productoSeleccionado.Precio * currentCount;
+        }
+    }
+
+    private void DecrementCount()
+    {
+        currentCount--;
+        if (currentCount < 1)
+        {
+            currentCount = 1;
+        }
+        Precio = productoSeleccionado.Precio * currentCount;
+    }
+
+    private void Aumentar(OrdenesDetalle detalle)
+    {
+        if (detalle.Producto.Cantidad <= 1)
+        {
+            Notificacion(ToastType.Warning, "No hay suficiente stock de este producto.");
+            detalle.Cantidad = 1;
+        }
+        else if (detalle.Cantidad >= detalle.Producto.Cantidad)
+        {
+            Notificacion(ToastType.Warning, "No hay suficiente stock de este producto.");
+        }
+        else
+            detalle.Cantidad++;
+
+        StateHasChanged(); 
+    }
+
+    private void Disminuir(OrdenesDetalle detalle)
+    {
+        if (detalle.Cantidad > 1)
+        {
+            detalle.Cantidad--;
+            StateHasChanged(); 
+        }
+    }
+
+    public async Task AgregarProducto(Productos producto)
+    {
+        var validar = Orden.OrdenesDetalle.FirstOrDefault(x => x.Producto.ProductoId == producto.ProductoId);
+        if (validar == null)
+        {
+            var detallePedido = new OrdenesDetalle
+                {
+                    Producto = productoSeleccionado,
+                    ProductoId = productoSeleccionado.ProductoId,
+                    Precio = productoSeleccionado.Precio,
+                    Cantidad = currentCount,
+                    OrdenId = Orden.OrdenId
+                };
+            Orden.OrdenesDetalle.Add(detallePedido);
+            Notificacion(ToastType.Success, $"Producto agregado al carrito.");
+        }
+        CerrarModal();
+    }
+
+    public void EliminarProducto(OrdenesDetalle detalle)
+    {
+        Orden.OrdenesDetalle.Remove(detalle);
+        Notificacion(ToastType.Danger, "Producto eliminado del carrito.");
+    }
+
+    public void CerrarModal()
+    {
+        modalProducto = false;
+        currentCount = 1;
+    }
+
+    private void MostrarModalProducto(Productos producto)
+    {
+        modalProducto = true;
+        productoSeleccionado = producto;
+        currentCount = 1;
+        Precio = productoSeleccionado.Precio;
+    }
+
+    private async Task ContinuarPedido()
+    {
+        if (Orden.OrdenesDetalle.Count() == 0)
+        {
+            return;
+        }
+
+        var detallesJson = JsonSerializer.Serialize(Orden.OrdenesDetalle);
+        await JS.InvokeVoidAsync("localStorage.setItem", "orderDetails", detallesJson);
+        navigation.NavigateTo($"/PizzaYa/Pedido");
+    }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+}
