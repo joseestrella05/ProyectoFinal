@@ -34,10 +34,10 @@ builder.Services.AddAuthentication(options =>
 
 // Configuración de Azure Blob Storage
 //Blob Services
-var storageConnection = builder.Configuration["StorageConnection:PizzaYa:Storage"];
+var storageConnection = builder.Configuration["StorageConnection:pizzaapp:Storage"];
 
 builder.Services.AddAzureClients(azureBuilder => {
-    azureBuilder.AddBlobServiceClient(storageConnection);
+    azureBuilder.AddBlobServiceClient(serviceUriOrConnectionString: storageConnection);
 });
 
 // Registrar servicios personalizados como scoped
