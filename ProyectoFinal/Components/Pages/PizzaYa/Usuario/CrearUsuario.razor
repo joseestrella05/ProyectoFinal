@@ -1,0 +1,90 @@
+﻿@page "/CrearUsuario"
+@using Microsoft.AspNetCore.Identity
+@using ProyectoFinal.Services
+@using Radzen
+@using Shared.Interfaces
+@inject IdentityUserService identityUserService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Crear Usuario</PageTitle>
+<div class="container">
+    <RadzenNotification />
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h3 class="fw-bold">Crear Usuario</h3>
+        </div>
+        <div class="card-body">
+            <EditForm Model="newUser " OnValidSubmit="Crear" FormName="createUser Form">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label for="NickName" class="form-label">Nombre de Usuario</label>
+                    <InputText id="NickName" class="form-control" @bind-Value="newUser.NickName" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Nombre" class="form-label">Nombre</label>
+                    <InputText id="Nombre" class="form-control" @bind-Value="newUser.Nombre" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Email" class="form-label">Email</label>
+                    <InputText id="Email" class="form-control" @bind-Value="newUser.Email" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Password" class="form-label">Contraseña</label>
+                    <InputText id="Password" type="password" class="form-control" @bind-Value="password" />
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Crear</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private ApplicationUser newUser = new ApplicationUser();
+    private string password = string.Empty;
+
+    private async Task Crear()
+    {
+        var result = await identityUserService.CreateUserAsync(newUser, password);
+        if (result.Succeeded)
+        {
+            var mensaje = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Usuario Creado",
+                Detail = $"El usuario {newUser.NickName} ha sido creado correctamente.",
+                Duration = 5000
+            };
+            NotificationService.Notify(mensaje);
+            NavigationManager.NavigateTo("/Usuarios");
+        }
+        else
+        {
+            var errorMessages = string.Join(", ", result.Errors.Select(e => e.Description));
+            var mensaje = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = $"No se pudo crear el usuario: {errorMessages}",
+                Duration = 5000
+            };
+            NotificationService.Notify(mensaje);
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/Usuarios");
+    }
+}
