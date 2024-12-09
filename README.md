@@ -48,3 +48,11 @@ Nuestro proyecto es un restaurante en línea especializado en la venta de las Pi
 ⚙️ Backend: Hecho en C# Logo de C#
 
 🗄️ Base de Datos: SQL Server
+
+
+👤 Usuario:
+Cliente: josegabrielestrella05@gmail.com
+Contrasena: *FSi4Z5da@Mm2-S
+
+Admin: admin123@admin.com
+Contrasena: WbxeB64@unbEW@E
