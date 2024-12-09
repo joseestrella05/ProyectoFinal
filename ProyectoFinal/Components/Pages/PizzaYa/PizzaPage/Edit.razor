@@ -1,0 +1,191 @@
+﻿@page "/PizzaYa/Productos/Edit/{ProductoId:int}"
+
+@using Shared.Interfaces
+@using Shared.Models
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IServer<Productos> productoService
+@inject IServer<CategoriaProductos> categoriaService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Editar Producto</PageTitle>
+<EditForm Model="Producto" OnValidSubmit="Editar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header fw-bold mb-0">
+                <h3><strong>Editar Producto</strong></h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label" for="nombre"><strong>Nombre</strong></label>
+                                <InputText class="form-control input-small" id="nombre" @bind-Value="Producto.Nombre"></InputText>
+                                <ValidationMessage For="@(() => Producto.Nombre)" />
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label" for="precio"><strong>Precio</strong></label>
+                                <InputNumber class="form-control input-small" id="precio" @bind-Value="Producto.Precio" @oninput="ActualizarITBIS"></InputNumber>
+                                <ValidationMessage For="@(() => Producto.Precio)" />
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label" for="cantidad"><strong>Cantidad</strong></label>
+                                <InputNumber class="form-control input-small" id="cantidad" @bind-Value="Producto.Cantidad" @oninput="ActualizarDisponibilidad"></InputNumber>
+                                <ValidationMessage For="@(() => Producto.Cantidad)" />
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label" for="itbis"><strong>ITBIS</strong></label>
+                                <InputNumber class="form-control input-small" id="itbis" @bind-Value="Producto.ITBIS" ReadOnly></InputNumber>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label" for="categoria"><strong>Categoría</strong></label>
+                                <InputSelect class="form-control input-small" id="categoria" @bind-Value="Producto.CategoriaId">
+                                    <option value="">Seleccione una categoría</option>
+                                    @foreach (var categoria in Categorias) {
+                                        <option value="@categoria.CategoriaId">@categoria.Nombre</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => Producto.CategoriaId)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <button class="btn btn-outline-secondary ms-2" type="button" @onclick="Volver">Volver</button>
+                <button class="btn btn-outline-primary ms-2" type="submit">Guardar</button>
+                <button class="btn btn-outline-danger ms-2" type="button" @onclick="MostrarModalEliminar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@*Confirmación para Eliminar *@
+<div class="modal fade" id="modalEliminar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEliminarLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="EliminarProducto">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (modalEliminar) {
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+        myModal.show();
+    </script>
+}
+
+@code {
+    [Parameter]
+    public int ProductoId { get; set; }
+    public Productos Producto { get; set; } = new Productos();
+    public List<CategoriaProductos> Categorias { get; set; } = new List<CategoriaProductos>();
+    public List<ToastMessage> Mensaje = new List<ToastMessage>();
+    public bool modalEliminar { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        if (ProductoId > 0) {
+            Producto = await productoService.GetObject(ProductoId);
+        }
+        Categorias = (await categoriaService.GetAllObject()).ToList();
+    }
+
+    public async Task Editar() {
+        if (!await Validar()) {
+            var result = await productoService.UpdateObject(Producto);
+            if (result) {
+                Notificacion(ToastType.Success, $"{Producto.Nombre} Se ha Editado Correctamente.");
+                Navigation.NavigateTo("/PizzaYa/Productos/Index");
+            }
+            else {
+                Notificacion(ToastType.Warning, $"Error al Editar el Producto");
+            }
+        }
+        else {
+            Notificacion(ToastType.Warning, $"Ya Existe un Producto con este Nombre");
+        }
+    }
+
+    public async Task<bool> Validar() {
+        var existe = await productoService.Exist(Producto.ProductoId, Producto.Nombre);
+        return existe;
+    }
+
+    private void ActualizarDisponibilidad(ChangeEventArgs e) {
+        if (int.TryParse(e.Value?.ToString(), out int cantidad)) {
+            Producto.Disponible = cantidad > 0;
+        }
+        else {
+            Producto.Disponible = false;
+        }
+    }
+
+    private void ActualizarITBIS(ChangeEventArgs e) {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal precio)) {
+            Producto.ITBIS = (float)(precio * 0.18m);
+        }
+    }
+
+    public void Volver() {
+        Navigation.NavigateTo("/PizzaYa/Productos/Index");
+    }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+
+    public void MostrarModalEliminar() {
+        modalEliminar = true;
+    }
+
+    public async Task EliminarProducto() {
+        var result = await productoService.DeleteObject(ProductoId);
+        if (result) {
+            Notificacion(ToastType.Success, "Producto eliminado correctamente.");
+            Navigation.NavigateTo("/Pizza/Productos/Index");
+        }
+        else {
+            Notificacion(ToastType.Warning, "Error al eliminar el producto.");
+        }
+        modalEliminar = false;
+    }
+}
+
+<style>
+    .img-small {
+        width: 350px;
+        height: 300px;
+        border-radius: 25px;
+    }
+</style>
