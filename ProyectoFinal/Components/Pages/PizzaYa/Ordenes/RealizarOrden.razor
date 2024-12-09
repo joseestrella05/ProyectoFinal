@@ -1,0 +1,273 @@
+﻿@page "/PizzaYa/Pedido"
+@inject NavigationManager NavigationManager
+@inject IServer<MetodoPagos> MetodoPagosService
+@inject IServer<Ordenes> OrdenesService
+@inject IServer<Productos> productoService
+@inject IJSRuntime JS
+@inject ApplicationDbContext context
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Shared.Interfaces
+@using Shared.Models
+@using System.Text.Json
+@using System.Transactions
+
+@attribute [Authorize(Roles = "Admin, Clientes")]
+
+<Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
+<h1 class="text-center mt-4 text-primary fw-bold">Tu Pedido</h1>
+
+<div class="container mt-5">
+    <EditForm Model="Orden" class="row">
+        <DataAnnotationsValidator />
+
+        <!-- Sección de Productos -->
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Tus Productos</h4>
+                </div>
+                <div class="card-body">
+                    @if (detalle != null && detalle.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var producto in detalle)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><strong>@producto.Cantidad</strong> x @producto.Producto?.Nombre</span>
+                                    <span class="badge bg-success fs-6">@((producto.Precio * producto.Cantidad).ToString("C"))</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No hay productos en tu carrito.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Pago -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white text-center">
+                    <h4>Total a Pagar</h4>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-success text-center mb-4">
+                        @detalle?.Sum(x => x.Precio * x.Cantidad).ToString("C")
+                    </h3>
+
+                    <!-- Método de Pago -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Método de Pago</h5>
+                        <InputSelect class="form-select" @bind-Value="Orden.MetodoPagoId">
+                            <option value="">Selecciona un método</option>
+                            @foreach (var metodo in MetodoDePago)
+                            {
+                                <option value="@metodo.MetodoPagoId">@metodo.Nombre</option>
+                            }
+                        </InputSelect>
+                        @if (Orden.MetodoPagoId == 2)
+                        {
+                            <button class="btn btn-outline-success mt-3" @onclick="MostrarModalPago">
+                                <i class="bi bi-credit-card"></i> Agregar Tarjeta
+                            </button>
+                        }
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary w-100" @onclick="RealizarPago">
+                            <i class="bi bi-cash-coin"></i> Pagar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+<!-- Modal para Tarjeta -->
+<div class="modal fade" id="modalPago1" tabindex="-1" aria-labelledby="modalPago1Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-center" id="modalPago1Label"><strong>Agregar Tarjeta</strong></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CerrarModalPago"></button>
+            </div>
+            <EditForm Model="Tarjeta" OnValidSubmit="Guardar">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="nombreTitular" class="form-label"><strong>Nombre del Titular</strong></label>
+                            <InputText class="form-control" id="nombreTitular" @bind-Value="Tarjeta.NombreTitular" />
+                            <ValidationMessage For="@(() => Tarjeta.NombreTitular)" class="text-danger" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="numeroTarjeta" class="form-label"><strong>Número de Tarjeta</strong></label>
+                            <InputText class="form-control" id="numeroTarjeta" @bind-Value="Tarjeta.NumeroTarjeta" />
+                            <ValidationMessage For="@(() => Tarjeta.NumeroTarjeta)" class="text-danger" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label for="codigo" class="form-label"><strong>CVV</strong></label>
+                            <InputNumber class="form-control" id="codigo" @bind-Value="Tarjeta.CodigoSeguridad" />
+                            <ValidationMessage For="@(() => Tarjeta.CodigoSeguridad)" class="text-danger" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fechaVencimiento" class="form-label"><strong>Fecha de Vencimiento</strong></label>
+                            <InputDate class="form-control" id="fechaVencimiento" @bind-Value="Tarjeta.FechaVencimiento" />
+                            <ValidationMessage For="@(() => Tarjeta.FechaVencimiento)" class="text-danger" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="montoPagar" class="form-label"><strong>Monto</strong></label>
+                            <InputNumber class="form-control" id="montoPagar" @bind-Value="Tarjeta.MontoPagar" />
+                            <ValidationMessage For="@(() => Tarjeta.MontoPagar)" class="text-danger" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" @onclick="Guardar">Guardar</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@if (modalPago)
+{
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('modalPago1'));
+        myModal.show();
+    </script>
+}
+
+@code {
+    public Ordenes Orden { get; set; } = new Ordenes();
+    public Tarjetas Tarjeta { get; set; } = new Tarjetas();
+    private List<MetodoPagos> MetodoDePago = new List<MetodoPagos>();
+    private List<OrdenesDetalle> detalle { get; set; } = new List<OrdenesDetalle>();
+    public List<ToastMessage> Mensaje = new List<ToastMessage>();
+    public bool modalPago { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosAsync();
+    }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage
+        {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
+
+    private async Task CargarDatosAsync()
+    {
+        try
+        {
+            MetodoDePago = await MetodoPagosService.GetAllObject();
+            var detallesJson = await JS.InvokeAsync<string>("localStorage.getItem", "orderDetails");
+            if (!string.IsNullOrEmpty(detallesJson))
+            {
+                detalle = JsonSerializer.Deserialize<List<OrdenesDetalle>>(detallesJson) ?? new List<OrdenesDetalle>();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejo de errores
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+        }
+    }
+
+    private async Task RealizarPago()
+    {
+        try
+        {
+            // Obtener el estado de autenticación y el usuario actual
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = await _userManager.GetUserAsync(authState.User);
+            if (user == null)
+            {
+                Notificacion(ToastType.Danger, "Usuario no autenticado");
+                return;
+            }
+
+            // Asigna los detalles de la orden
+            foreach (var detalleItem in detalle)
+            {
+                // Cargar el producto sin rastrear para evitar conflictos
+                var producto = await productoService.GetObject(detalleItem.ProductoId);
+                if (producto != null)
+                {
+                    // Verificar si el producto ya está siendo rastreado
+                    var trackedProducto = context.ChangeTracker.Entries<Productos>().FirstOrDefault(e => e.Entity.ProductoId == producto.ProductoId)?.Entity;
+                    if (trackedProducto != null)
+                    {
+                        detalleItem.Producto = trackedProducto;
+                    }
+                    else
+                    {
+                        detalleItem.Producto = producto;
+                        context.Entry(producto).State = EntityState.Unchanged;
+                    }
+                }
+                Orden.OrdenesDetalle.Add(detalleItem);
+            }
+
+            // Calcular monto e ITBIS
+            Orden.Monto = detalle.Sum(x => x.Precio * x.Cantidad);
+            Orden.ITBIS = detalle.Sum(x => x.Producto.ITBIS * x.Cantidad);
+
+            // Asignar detalles del usuario a la orden
+            Orden.ClienteId = user.Id;
+            Orden.NombreCliente = user.Nombre;
+            Orden.Telefono = user.PhoneNumber; // Asigna el teléfono real del usuario
+            Orden.EstadoId = 1; // Inicialmente en estado Pendiente
+
+            // Guardar la orden
+            await OrdenesService.AddObject(Orden);
+            Notificacion(ToastType.Success, "Orden realizada con éxito");
+
+            await Task.Delay(2000);
+            Volver();
+        }
+        catch (Exception ex)
+        {
+            // Manejo de errores
+            Console.WriteLine($"Error al realizar el pago: {ex.Message}");
+            Notificacion(ToastType.Danger, "Error al realizar el pago");
+        }
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/PizzaYa/Menu");
+    }
+
+    private void CerrarModalPago()
+    {
+        modalPago = false;
+    }
+
+    private void Guardar()
+    {
+        modalPago = false;
+    }
+
+    private void MostrarModalPago()
+    {
+        modalPago = true;
+    }
+}
+
