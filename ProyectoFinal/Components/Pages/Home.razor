@@ -1,7 +1,80 @@
 ﻿@page "/"
+@using Shared.Interfaces
+@using Shared.Models
+@inject IServer<Productos> productoService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Pizza Ya</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container my-5">
+    <header class="text-center mb-5">
+        <h1 class="display-4 text-primary"><strong>Bienvenidos a Pizza Ya</strong></h1>
+        <p class="lead text-muted">¡Las mejores pizzas al alcance de un clic!</p>
+    </header>
 
-Welcome to your new app.
+    <div class="row">
+        @if (productos != null && productos.Any())
+        {
+            // Limitar a los primeros 3 productos
+            var productosLimitados = productos.Take(3);
+
+            foreach (var producto in productosLimitados)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <img src="@producto.ImagenUrl" class="card-img-top rounded-top" alt="@producto.Nombre" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-primary"><strong>@producto.Nombre</strong></h5>
+                            <p class="card-text text-muted text-center">@producto.Descripcion</p>
+                            <div class="text-center">
+                                <a href="/PizzaYa/Menu" class="btn btn-primary btn-block">Ordenar Ahora</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando productos...</span>
+                </div>
+                <p class="mt-3 text-muted">Estamos preparando nuestras mejores pizzas para ti...</p>
+            </div>
+        }
+    </div>
+</div>
+
+<footer class="bg-dark text-light py-5">
+    <div class="container">
+        <div class="row text-center text-md-start">
+            <div class="col-md-4 mb-3">
+                <h5 class="text-uppercase">Horarios de Atención</h5>
+                <p><strong>Martes a Domingos:</strong> 12:00pm - 10:00pm</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5 class="text-uppercase">Contáctanos</h5>
+                <p><strong>Teléfono:</strong> 828-685-7345</p>
+                <p><strong>Email:</strong> contacto@pizzaya.com</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5 class="text-uppercase">Síguenos</h5>
+                <a href="#" class="text-light me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                <a href="#" class="text-light me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                <a href="#" class="text-light"><i class="fab fa-twitter fa-lg"></i></a>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <small>&copy; 2024 Pizza Ya. Todos los derechos reservados.</small>
+        </div>
+    </div>
+</footer>
+
+@code {
+    private List<Productos> productos = new List<Productos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await productoService.GetAllObject();
+    }
+}
