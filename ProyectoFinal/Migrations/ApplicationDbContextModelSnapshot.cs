@@ -257,11 +257,6 @@ namespace ProyectoFinal.Migrations
                         new
                         {
                             CategoriaId = 2,
-                            Nombre = "Italian chesse"
-                        },
-                        new
-                        {
-                            CategoriaId = 3,
                             Nombre = "Bebidas"
                         });
                 });
@@ -464,7 +459,7 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 2,
                             Cantidad = 50,
-                            CategoriaId = 2,
+                            CategoriaId = 1,
                             Descripcion = "Deliciosa pizza con jamón ahumado, queso mozzarella y un toque de albahaca fresca.",
                             Disponible = true,
                             ITBIS = 90f,
@@ -476,7 +471,7 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 3,
                             Cantidad = 50,
-                            CategoriaId = 3,
+                            CategoriaId = 1,
                             Descripcion = "Una mezcla perfecta de carnes, vegetales frescos, mozzarella y orégano.",
                             Disponible = true,
                             ITBIS = 72f,
@@ -504,7 +499,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Ideal para compartir, con múltiples ingredientes: pepperoni, jamón, champiñones y más.",
                             Disponible = true,
                             ITBIS = 76.5f,
-                            ImagenUrl = "/images/FamiliarEspecial.webp",
+                            ImagenUrl = "/images/FamiliarEspecial.jpg",
                             Nombre = "Familiar Especial",
                             Precio = 425f
                         },
@@ -512,7 +507,7 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 6,
                             Cantidad = 50,
-                            CategoriaId = 2,
+                            CategoriaId = 1,
                             Descripcion = "Pizza personal con ingredientes clásicos italianos: tomate, mozzarella y albahaca.",
                             Disponible = true,
                             ITBIS = 72f,
@@ -540,7 +535,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Sabor ahumado con carne de cerdo desmechada, cebolla caramelizada y salsa BBQ.",
                             Disponible = true,
                             ITBIS = 63f,
-                            ImagenUrl = "/images/Barbacoa.jpg",
+                            ImagenUrl = "/images/Barbacoa(BBQ).jpg",
                             Nombre = "Barbacoa (BBQ)",
                             Precio = 350f
                         },
@@ -572,11 +567,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 14,
                             Cantidad = 50,
-                            CategoriaId = 1,
+                            CategoriaId = 2,
                             Descripcion = "Botella de agua fría, ideal para acompañar cualquier pizza.",
                             Disponible = true,
                             ITBIS = 3.6f,
-                            ImagenUrl = "/images/Agua.webp",
+                            ImagenUrl = "/images/Agua.jpg",
                             Nombre = "Agua",
                             Precio = 20f
                         },
@@ -584,11 +579,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 15,
                             Cantidad = 50,
-                            CategoriaId = 3,
+                            CategoriaId = 2,
                             Descripcion = "Refresco clásico de Coca Cola en presentación de 500ml.",
                             Disponible = true,
                             ITBIS = 9f,
-                            ImagenUrl = "/images/CocaCola.webp",
+                            ImagenUrl = "/images/CocaCola.jpg",
                             Nombre = "Coca Cola 500ml",
                             Precio = 50f
                         });

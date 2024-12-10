@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProyectoFinal.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -339,8 +339,7 @@ namespace ProyectoFinal.Migrations
                 values: new object[,]
                 {
                     { 1, "Pizza" },
-                    { 2, "Italian chesse" },
-                    { 3, "Bebidas" }
+                    { 2, "Bebidas" }
                 });
 
             migrationBuilder.InsertData(
@@ -368,18 +367,18 @@ namespace ProyectoFinal.Migrations
                 columns: new[] { "ProductoId", "Cantidad", "CategoriaId", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "Nombre", "Precio" },
                 values: new object[,]
                 {
-                    { 1, 50, 1, "Pizza clásica con doble pepperoni, mozzarella y salsa de tomate sobre masa artesanal.", true, 85.5f, "https://imagenespizza.blob.core.windows.net/pizza/pexels-polina-tankilevitch-4109083.jpg", "Gran Pepperoni", 475f },
-                    { 2, 50, 2, "Deliciosa pizza con jamón ahumado, queso mozzarella y un toque de albahaca fresca.", true, 90f, "https://imagenespizza.blob.core.windows.net/pizza/JamonDeluxe.jpg", "Jamón Deluxe", 500f },
-                    { 3, 50, 3, "Una mezcla perfecta de carnes, vegetales frescos, mozzarella y orégano.", true, 72f, "https://imagenespizza.blob.core.windows.net/pizza/pexels-abrar-27874930.jpg", "Pizza Mixta", 450f },
-                    { 4, 50, 1, "Pizza dulce y salada con jamón, piña, mozzarella y salsa de tomate.", true, 58.5f, "https://imagenespizza.blob.core.windows.net/pizza/Hawaiana.jpeg", "Hawaiana", 325f },
-                    { 5, 50, 1, "Ideal para compartir, con múltiples ingredientes: pepperoni, jamón, champiñones y más.", true, 76.5f, "https://imagenespizza.blob.core.windows.net/pizza/Familiar.webp", "Familiar Especial", 425f },
-                    { 6, 50, 2, "Pizza personal con ingredientes clásicos italianos: tomate, mozzarella y albahaca.", true, 72f, "https://imagenespizza.blob.core.windows.net/pizza/IndividualItaliana.jpg", "Individual Italiana", 400f },
-                    { 7, 50, 1, "Cargada de vegetales frescos como pimientos, champiñones, cebolla y espinacas.", true, 90f, "https://imagenespizza.blob.core.windows.net/pizza/Vegetariana.jpg", "Vegetariana", 500f },
-                    { 8, 50, 1, "Sabor ahumado con carne de cerdo desmechada, cebolla caramelizada y salsa BBQ.", true, 63f, "https://imagenespizza.blob.core.windows.net/pizza/Barbacoa(BBQ).jpg", "Barbacoa (BBQ)", 350f },
-                    { 9, 50, 1, "La tradición napolitana con tomates frescos, mozzarella y aceite de oliva.", true, 67.5f, "https://imagenespizza.blob.core.windows.net/pizza/Napolitana.jpg", "Napolitana", 375f },
-                    { 10, 50, 1, "Una mezcla de quesos irresistibles: mozzarella, parmesano, gorgonzola y ricotta.", true, 90f, "https://imagenespizza.blob.core.windows.net/pizza/CuatroQuesos.jpg", "Cuatro Quesos", 500f },
-                    { 14, 50, 1, "Botella de agua fría, ideal para acompañar cualquier pizza.", true, 3.6f, "https://imagenespizza.blob.core.windows.net/pizza/Agua.webp", "Agua", 20f },
-                    { 15, 50, 3, "Refresco clásico de Coca Cola en presentación de 500ml.", true, 9f, "https://imagenespizza.blob.core.windows.net/pizza/Cocacola.webp", "Coca Cola 500ml", 50f }
+                    { 1, 50, 1, "Pizza clásica con doble pepperoni, mozzarella y salsa de tomate sobre masa artesanal.", true, 85.5f, "/images/Peperonni.jpg", "Gran Pepperoni", 475f },
+                    { 2, 50, 1, "Deliciosa pizza con jamón ahumado, queso mozzarella y un toque de albahaca fresca.", true, 90f, "/images/JamonDeluxe.jpg", "Jamón Deluxe", 500f },
+                    { 3, 50, 1, "Una mezcla perfecta de carnes, vegetales frescos, mozzarella y orégano.", true, 72f, "/images/Mixta.jpg", "Pizza Mixta", 450f },
+                    { 4, 50, 1, "Pizza dulce y salada con jamón, piña, mozzarella y salsa de tomate.", true, 58.5f, "/images/Hawaiana.jpg", "Hawaiana", 325f },
+                    { 5, 50, 1, "Ideal para compartir, con múltiples ingredientes: pepperoni, jamón, champiñones y más.", true, 76.5f, "/images/FamiliarEspecial.jpg", "Familiar Especial", 425f },
+                    { 6, 50, 1, "Pizza personal con ingredientes clásicos italianos: tomate, mozzarella y albahaca.", true, 72f, "/images/IndividualItaliana.jpg", "Individual Italiana", 400f },
+                    { 7, 50, 1, "Cargada de vegetales frescos como pimientos, champiñones, cebolla y espinacas.", true, 90f, "/images/Vegetariana.jpg", "Vegetariana", 500f },
+                    { 8, 50, 1, "Sabor ahumado con carne de cerdo desmechada, cebolla caramelizada y salsa BBQ.", true, 63f, "/images/Barbacoa(BBQ).jpg", "Barbacoa (BBQ)", 350f },
+                    { 9, 50, 1, "La tradición napolitana con tomates frescos, mozzarella y aceite de oliva.", true, 67.5f, "/images/Napolitana.jpg", "Napolitana", 375f },
+                    { 10, 50, 1, "Una mezcla de quesos irresistibles: mozzarella, parmesano, gorgonzola y ricotta.", true, 90f, "/images/CuatroQuesos.jpg", "Cuatro Quesos", 500f },
+                    { 14, 50, 2, "Botella de agua fría, ideal para acompañar cualquier pizza.", true, 3.6f, "/images/Agua.jpg", "Agua", 20f },
+                    { 15, 50, 2, "Refresco clásico de Coca Cola en presentación de 500ml.", true, 9f, "/images/CocaCola.jpg", "Coca Cola 500ml", 50f }
                 });
 
             migrationBuilder.CreateIndex(

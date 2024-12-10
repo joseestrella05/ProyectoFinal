@@ -12,8 +12,8 @@ using ProyectoFinal.Data;
 namespace ProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241203151520_Azure")]
-    partial class Azure
+    [Migration("20241210001740_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -260,11 +260,6 @@ namespace ProyectoFinal.Migrations
                         new
                         {
                             CategoriaId = 2,
-                            Nombre = "Italian chesse"
-                        },
-                        new
-                        {
-                            CategoriaId = 3,
                             Nombre = "Bebidas"
                         });
                 });
@@ -459,7 +454,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Pizza clásica con doble pepperoni, mozzarella y salsa de tomate sobre masa artesanal.",
                             Disponible = true,
                             ITBIS = 85.5f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/pexels-polina-tankilevitch-4109083.jpg",
+                            ImagenUrl = "/images/Peperonni.jpg",
                             Nombre = "Gran Pepperoni",
                             Precio = 475f
                         },
@@ -467,11 +462,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 2,
                             Cantidad = 50,
-                            CategoriaId = 2,
+                            CategoriaId = 1,
                             Descripcion = "Deliciosa pizza con jamón ahumado, queso mozzarella y un toque de albahaca fresca.",
                             Disponible = true,
                             ITBIS = 90f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/JamonDeluxe.jpg",
+                            ImagenUrl = "/images/JamonDeluxe.jpg",
                             Nombre = "Jamón Deluxe",
                             Precio = 500f
                         },
@@ -479,11 +474,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 3,
                             Cantidad = 50,
-                            CategoriaId = 3,
+                            CategoriaId = 1,
                             Descripcion = "Una mezcla perfecta de carnes, vegetales frescos, mozzarella y orégano.",
                             Disponible = true,
                             ITBIS = 72f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/pexels-abrar-27874930.jpg",
+                            ImagenUrl = "/images/Mixta.jpg",
                             Nombre = "Pizza Mixta",
                             Precio = 450f
                         },
@@ -495,7 +490,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Pizza dulce y salada con jamón, piña, mozzarella y salsa de tomate.",
                             Disponible = true,
                             ITBIS = 58.5f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Hawaiana.jpeg",
+                            ImagenUrl = "/images/Hawaiana.jpg",
                             Nombre = "Hawaiana",
                             Precio = 325f
                         },
@@ -507,7 +502,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Ideal para compartir, con múltiples ingredientes: pepperoni, jamón, champiñones y más.",
                             Disponible = true,
                             ITBIS = 76.5f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Familiar.webp",
+                            ImagenUrl = "/images/FamiliarEspecial.jpg",
                             Nombre = "Familiar Especial",
                             Precio = 425f
                         },
@@ -515,11 +510,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 6,
                             Cantidad = 50,
-                            CategoriaId = 2,
+                            CategoriaId = 1,
                             Descripcion = "Pizza personal con ingredientes clásicos italianos: tomate, mozzarella y albahaca.",
                             Disponible = true,
                             ITBIS = 72f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/IndividualItaliana.jpg",
+                            ImagenUrl = "/images/IndividualItaliana.jpg",
                             Nombre = "Individual Italiana",
                             Precio = 400f
                         },
@@ -531,7 +526,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Cargada de vegetales frescos como pimientos, champiñones, cebolla y espinacas.",
                             Disponible = true,
                             ITBIS = 90f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Vegetariana.jpg",
+                            ImagenUrl = "/images/Vegetariana.jpg",
                             Nombre = "Vegetariana",
                             Precio = 500f
                         },
@@ -543,7 +538,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Sabor ahumado con carne de cerdo desmechada, cebolla caramelizada y salsa BBQ.",
                             Disponible = true,
                             ITBIS = 63f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Barbacoa(BBQ).jpg",
+                            ImagenUrl = "/images/Barbacoa(BBQ).jpg",
                             Nombre = "Barbacoa (BBQ)",
                             Precio = 350f
                         },
@@ -555,7 +550,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "La tradición napolitana con tomates frescos, mozzarella y aceite de oliva.",
                             Disponible = true,
                             ITBIS = 67.5f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Napolitana.jpg",
+                            ImagenUrl = "/images/Napolitana.jpg",
                             Nombre = "Napolitana",
                             Precio = 375f
                         },
@@ -567,7 +562,7 @@ namespace ProyectoFinal.Migrations
                             Descripcion = "Una mezcla de quesos irresistibles: mozzarella, parmesano, gorgonzola y ricotta.",
                             Disponible = true,
                             ITBIS = 90f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/CuatroQuesos.jpg",
+                            ImagenUrl = "/images/CuatroQuesos.jpg",
                             Nombre = "Cuatro Quesos",
                             Precio = 500f
                         },
@@ -575,11 +570,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 14,
                             Cantidad = 50,
-                            CategoriaId = 1,
+                            CategoriaId = 2,
                             Descripcion = "Botella de agua fría, ideal para acompañar cualquier pizza.",
                             Disponible = true,
                             ITBIS = 3.6f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Agua.webp",
+                            ImagenUrl = "/images/Agua.jpg",
                             Nombre = "Agua",
                             Precio = 20f
                         },
@@ -587,11 +582,11 @@ namespace ProyectoFinal.Migrations
                         {
                             ProductoId = 15,
                             Cantidad = 50,
-                            CategoriaId = 3,
+                            CategoriaId = 2,
                             Descripcion = "Refresco clásico de Coca Cola en presentación de 500ml.",
                             Disponible = true,
                             ITBIS = 9f,
-                            ImagenUrl = "https://imagenespizza.blob.core.windows.net/pizza/Cocacola.webp",
+                            ImagenUrl = "/images/CocaCola.jpg",
                             Nombre = "Coca Cola 500ml",
                             Precio = 50f
                         });
