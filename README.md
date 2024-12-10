@@ -2,46 +2,46 @@ Nuestro proyecto es un restaurante en línea especializado en la venta de las Pi
 
 👥 Integrantes:
 
-👨‍💻 Jose Gabriel Estrella
+Jose Gabriel Estrella
 
-👨‍💻 Enmanuel Gomez
+Enmanuel Gomez
 
 
-🌟 Funcionalidades Principales Para Clientes
+Funcionalidades Principales Para Clientes
 
-🛒 Menú y Carrito de Compras:
+Menú y Carrito de Compras:
 
-👀 Ver menú .
+Ver menú .
 
-➕ Seleccionar y agregar al carrito de compras.
+ Seleccionar y agregar al carrito de compras.
 
-💳 Pago:
+ Pago:
 
-💵 Pagar con efectivo o tarjeta.
+ Pagar con efectivo o tarjeta.
 
-📦 Órdenes y Estado:
+ Órdenes y Estado:
 
-👀 Ver el estado de tus órdenes en tiempo real.
+ Ver el estado de tus órdenes en tiempo real.
 
-🔄 Mantente informado sobre el progreso de tu pedido.
+ Mantente informado sobre el progreso de tu pedido.
 
-🛠️ Para Administradores
+ Para Administradores
 
-📦 Gestión de Productos:
+ Gestión de Productos:
 
-✏️ Agregar y editar productos en el menú.
+Agregar y editar productos en el menú.
 
-👥 Gestión de Usuarios:
+Gestión de Usuarios:
 
-👤 Ver y gestionar los perfiles de clientes y otros administradores.
+ Ver y gestionar los perfiles de clientes y otros administradores.
 
-📦 Gestión de Órdenes:
+ Gestión de Órdenes:
 
-📋 Ver todas las órdenes realizadas.
+Ver todas las órdenes realizadas.
 
-🔄 Cambiar el estado de las órdenes según sea necesario.
+Cambiar el estado de las órdenes según sea necesario.
 
-🛠️ Tecnologías Utilizadas
+Tecnologías Utilizadas
 
 🖥️ Frontend: Blazor Server con .NET 8, HTML5 y Boostrap
 
